@@ -82,10 +82,10 @@ public class PhotoService {
             exifData.setColorSpace(
                     Optional.ofNullable(String.valueOf(exifArray.findField(ExifTagConstants.EXIF_TAG_COLOR_SPACE).getValue()))
                             .orElse(Params.EMPTY_VALUE));
-            exifData.setColorSpace(
+            exifData.setWidth(
                     Optional.ofNullable(String.valueOf((int) Sanselan.getImageSize(image).getWidth()))
                             .orElse(Params.EMPTY_VALUE));
-            exifData.setColorSpace(
+            exifData.setHeight(
                     Optional.ofNullable(String.valueOf((int) Sanselan.getImageSize(image).getHeight()))
                             .orElse(Params.EMPTY_VALUE));
             exifData.setFileSize((int)imageFile.length());
