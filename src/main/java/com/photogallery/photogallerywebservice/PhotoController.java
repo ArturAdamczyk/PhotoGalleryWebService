@@ -25,7 +25,13 @@ public class PhotoController {
     public ResponseEntity<List<Photo>> getPhotos() {
         List<Photo> photosList = photoRepository.findAll();
         for(Photo photo: photosList){
-            photo.setExifData(photoService.extractExifData(photo.getImage()));
+            try{
+                photo.setExifData(photoService.extractExifData(photo.getImage()));
+            }catch(ExifDataException e){
+                return ResponseEntity
+                        .notFound()
+                        .build();
+            }
         }
         return ResponseEntity
                 .ok()
@@ -36,10 +42,16 @@ public class PhotoController {
     public ResponseEntity<Photo> getPhoto(@PathVariable("id") long id) {
         Optional<Photo> photo = photoRepository.findById(id);
         if (photo.isPresent()) {
-            photo.get().setExifData(photoService.extractExifData(photo.get().getImage()));
-            return ResponseEntity
-                    .ok()
-                    .body(photo.get());
+            try{
+                photo.get().setExifData(photoService.extractExifData(photo.get().getImage()));
+                return ResponseEntity
+                        .ok()
+                        .body(photo.get());
+            }catch(ExifDataException e){
+                return ResponseEntity
+                        .notFound()
+                        .build();
+            }
         }else{
             return ResponseEntity
                     .notFound()
@@ -59,7 +71,7 @@ public class PhotoController {
             return ResponseEntity
                     .ok()
                     .body(photo);
-        }catch(IOException e){
+        }catch(IOException | ExifDataException e){
             return ResponseEntity
                     .notFound()
                     .build();
@@ -68,7 +80,6 @@ public class PhotoController {
 
     @PutMapping("/updatePhoto/{id}")
     public ResponseEntity<Photo> updatePhoto(@PathVariable("id") long id, @RequestBody Photo photo) {
-
         Optional<Photo> photoOptional = photoRepository.findById(id);
         photoOptional.get().setExifData(photo.getExifData());
 
@@ -95,10 +106,17 @@ public class PhotoController {
     @RequestMapping(value = "/getImage/{id}", method = RequestMethod.GET,
             produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getImage(@PathVariable long id) {
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(photoRepository.getOne(id).getImage());
+        Optional<Photo> photo = photoRepository.findById(id);
+        if(photo.isPresent()){
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(photo.get().getImage());
+        }else{
+            return ResponseEntity
+                    .notFound()
+                    .build();
+        }
     }
 
 }
