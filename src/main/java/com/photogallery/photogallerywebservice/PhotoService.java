@@ -31,7 +31,7 @@ public class PhotoService {
      *
      * @return ExifData
      */
-    public ExifData extractExifData(byte[] image){
+    public ExifData extractExifData(byte[] image) throws ExifDataException{
 
         ExifData exifData = new ExifData();
         exifData.initialize();
@@ -91,8 +91,10 @@ public class PhotoService {
             exifData.setFileSize((int)imageFile.length());
         }catch(IOException e){
             logger.error(e.getMessage());
+            throw new ExifDataException(e.getMessage());
         }catch(ImageReadException e){
             logger.error(e.getMessage());
+            throw new ExifDataException(e.getMessage());
         }finally{
             return exifData;
         }
